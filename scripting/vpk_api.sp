@@ -1,6 +1,6 @@
 /*
 *	VPK_API
-*	Copyright (C) 2021 Silvers
+*	Copyright (C) 2024 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION		"1.1"
+#define PLUGIN_VERSION		"1.2"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+1.2 (28-Jan-2024)
+	- Fixed memory leak caused by clearing StringMap/ArrayList data instead of deleting.
 
 1.1 (04-Dec-2021)
 	- Changes to fix warnings when compiling on SourceMod 1.11.
@@ -102,7 +105,7 @@ public void OnPluginStart()
 // ====================================================================================================
 // NATIVES
 // ====================================================================================================
-public int Native_VPK_GetHeader(Handle plugin, int numParams)
+int Native_VPK_GetHeader(Handle plugin, int numParams)
 {
 	// Load File
 	char sPath[PLATFORM_MAX_PATH];
@@ -153,7 +156,7 @@ public int Native_VPK_GetHeader(Handle plugin, int numParams)
 	return true;
 }
 
-public int Native_VPK_GetFileList(Handle plugin, int numParams)
+int Native_VPK_GetFileList(Handle plugin, int numParams)
 {
 	// Load File
 	char sPath[PLATFORM_MAX_PATH];
@@ -174,7 +177,7 @@ public int Native_VPK_GetFileList(Handle plugin, int numParams)
 	return files;
 }
 
-public int Native_VPK_ExtractFiles(Handle plugin, int numParams)
+int Native_VPK_ExtractFiles(Handle plugin, int numParams)
 {
 	// Open path
 	char sPath[PLATFORM_MAX_PATH];
@@ -206,7 +209,7 @@ public int Native_VPK_ExtractFiles(Handle plugin, int numParams)
 	return true;
 }
 
-public int Native_VPK_WriteFiles(Handle plugin, int numParams)
+int Native_VPK_WriteFiles(Handle plugin, int numParams)
 {
 	// Write path
 	char sPath[PLATFORM_MAX_PATH];
@@ -249,7 +252,7 @@ public int Native_VPK_WriteFiles(Handle plugin, int numParams)
 // READ VPK - FILE LIST - EXTRACT
 // ====================================================================================================
 // Asynchronous loading
-public Action TimerDelayExtract(Handle timer, DataPack dFrame)
+Action TimerDelayExtract(Handle timer, DataPack dFrame)
 {
 	dFrame.Reset();
 
@@ -773,7 +776,10 @@ bool CheckFilesForWriting(const char sPath[PLATFORM_MAX_PATH], ArrayList aList, 
 
 
 	// Move extensions back, add to main list
-	aList.Clear();
+	// .Clear() is creating a memory leak
+	// aList.Clear();
+	delete aList;
+	aList = new ArrayList(ByteCountToCells(PLATFORM_MAX_PATH));
 
 	for( int i = 0; i < aSortList.Length; i++ )
 	{
@@ -821,7 +827,7 @@ bool CheckFilesForWriting(const char sPath[PLATFORM_MAX_PATH], ArrayList aList, 
 // ====================================================================================================
 // WRITE VPK
 // ====================================================================================================
-public Action TimerDelayPacking(Handle timer, DataPack dFrame)
+Action TimerDelayPacking(Handle timer, DataPack dFrame)
 {
 	dFrame.Reset();
 
