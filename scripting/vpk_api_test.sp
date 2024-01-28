@@ -1,6 +1,6 @@
 /*
 *	VPK_API - (Example Demo)
-*	Copyright (C) 2021 Silvers
+*	Copyright (C) 2024 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ public void OnPluginStart()
 // ====================================================================================================
 //					TEST
 // ====================================================================================================
-public Action CmdTest(int client, int args)
+Action CmdTest(int client, int args)
 {
 	PrintToServer("");
 	PrintToServer("");
